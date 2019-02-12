@@ -1,7 +1,7 @@
 require 'bundler/gem_tasks'
 require 'rake/testtask'
 require 'yard'
-require 'steem'
+require 'crea'
 
 Rake::TestTask.new(test: ['clean:vcr', 'test:threads']) do |t|
   t.libs << 'test'
@@ -25,15 +25,15 @@ namespace :test do
     t.libs << 'test'
     t.libs << 'lib'
     t.test_files = [
-      'test/steem/account_by_key_api_test.rb',
-      'test/steem/account_history_api_test.rb',
-      'test/steem/block_api_test.rb',
-      'test/steem/database_api_test.rb',
-      'test/steem/follow_api_test.rb',
-      'test/steem/jsonrpc_test.rb',
-      'test/steem/market_history_api_test.rb',
-      'test/steem/tags_api_test.rb',
-      'test/steem/witness_api_test.rb'
+      'test/crea/account_by_key_api_test.rb',
+      'test/crea/account_history_api_test.rb',
+      'test/crea/block_api_test.rb',
+      'test/crea/database_api_test.rb',
+      'test/crea/follow_api_test.rb',
+      'test/crea/jsonrpc_test.rb',
+      'test/crea/market_history_api_test.rb',
+      'test/crea/tags_api_test.rb',
+      'test/crea/witness_api_test.rb'
     ]
     t.ruby_opts << if ENV['HELL_ENABLED']
       '-W2'
@@ -50,8 +50,8 @@ namespace :test do
     t.libs << 'test'
     t.libs << 'lib'
     t.test_files = [
-      'test/steem/broadcast_test.rb',
-      'test/steem/transaction_builder_test.rb'
+      'test/crea/broadcast_test.rb',
+      'test/crea/transaction_builder_test.rb'
     ]
     t.ruby_opts << if ENV['HELL_ENABLED']
       '-W2'
@@ -68,7 +68,7 @@ namespace :test do
     t.libs << 'test'
     t.libs << 'lib'
     t.test_files = [
-      'test/steem/testnet_test.rb'
+      'test/crea/testnet_test.rb'
     ]
     t.ruby_opts << if ENV['HELL_ENABLED']
       '-W2'
@@ -82,8 +82,8 @@ namespace :test do
     next if !!ENV['TEST']
     
     threads = []
-    api = Steem::Api.new(url: ENV['TEST_NODE'])
-    database_api = Steem::DatabaseApi.new(url: ENV['TEST_NODE'])
+    api = Crea::Api.new(url: ENV['TEST_NODE'])
+    database_api = Crea::DatabaseApi.new(url: ENV['TEST_NODE'])
     witnesses = {}
     keys = %i(created url total_missed props running_version
       hardfork_version_vote hardfork_time_vote)
@@ -102,20 +102,20 @@ namespace :test do
               [k, v] if keys.include? k.to_sym
             end.compact.to_h
             
-            sbd_exchange_rate = witness[:sbd_exchange_rate]
-            base = sbd_exchange_rate[:base].to_f
+            cbd_exchange_rate = witness[:cbd_exchange_rate]
+            base = cbd_exchange_rate[:base].to_f
             
-            if (quote = sbd_exchange_rate[:quote].to_f) > 0
+            if (quote = cbd_exchange_rate[:quote].to_f) > 0
               rate = (base / quote).round(3)
-              witnesses[witness.owner][:sbd_exchange_rate] = rate
+              witnesses[witness.owner][:cbd_exchange_rate] = rate
             else
-              witnesses[witness.owner][:sbd_exchange_rate] = nil
+              witnesses[witness.owner][:cbd_exchange_rate] = nil
             end
             
-            last_sbd_exchange_update = witness[:last_sbd_exchange_update]
-            last_sbd_exchange_update = Time.parse(last_sbd_exchange_update + 'Z')
-            last_sbd_exchange_elapsed = '%.2f hours ago' % ((Time.now.utc - last_sbd_exchange_update) / 60)
-            witnesses[witness.owner][:last_sbd_exchange_elapsed] = last_sbd_exchange_elapsed
+            last_cbd_exchange_update = witness[:last_cbd_exchange_update]
+            last_cbd_exchange_update = Time.parse(last_cbd_exchange_update + 'Z')
+            last_cbd_exchange_elapsed = '%.2f hours ago' % ((Time.now.utc - last_cbd_exchange_update) / 60)
+            witnesses[witness.owner][:last_cbd_exchange_elapsed] = last_cbd_exchange_elapsed
           end
         end
       end
@@ -141,8 +141,8 @@ namespace :stream do
   task :block_range, [:mode, :at_block_num] do |t, args|
     mode = (args[:mode] || 'irreversible').to_sym
     first_block_num = args[:at_block_num].to_i if !!args[:at_block_num]
-    stream = Steem::Stream.new(url: ENV['TEST_NODE'], mode: mode)
-    api = Steem::Api.new(url: ENV['TEST_NODE'])
+    stream = Crea::Stream.new(url: ENV['TEST_NODE'], mode: mode)
+    api = Crea::Api.new(url: ENV['TEST_NODE'])
     last_block_num = nil
     last_timestamp = nil
     range_complete = false
@@ -189,8 +189,8 @@ namespace :stream do
   task :trx_range, [:mode, :at_block_num] do |t, args|
     mode = (args[:mode] || 'irreversible').to_sym
     first_block_num = args[:at_block_num].to_i if !!args[:at_block_num]
-    stream = Steem::Stream.new(url: ENV['TEST_NODE'], mode: mode)
-    api = Steem::Api.new(url: ENV['TEST_NODE'])
+    stream = Crea::Stream.new(url: ENV['TEST_NODE'], mode: mode)
+    api = Crea::Api.new(url: ENV['TEST_NODE'])
     
     api.get_dynamic_global_properties do |properties|
       current_block_num = if mode == :head
@@ -212,8 +212,8 @@ namespace :stream do
   task :op_range, [:mode, :at_block_num] do |t, args|
     mode = (args[:mode] || 'irreversible').to_sym
     first_block_num = args[:at_block_num].to_i if !!args[:at_block_num]
-    stream = Steem::Stream.new(url: ENV['TEST_NODE'], mode: mode)
-    api = Steem::Api.new(url: ENV['TEST_NODE'])
+    stream = Crea::Stream.new(url: ENV['TEST_NODE'], mode: mode)
+    api = Crea::Api.new(url: ENV['TEST_NODE'])
     
     api.get_dynamic_global_properties do |properties|
       current_block_num = if mode == :head
@@ -235,8 +235,8 @@ namespace :stream do
   task :vop_range, [:mode, :at_block_num] do |t, args|
     mode = (args[:mode] || 'irreversible').to_sym
     first_block_num = args[:at_block_num].to_i if !!args[:at_block_num]
-    stream = Steem::Stream.new(url: ENV['TEST_NODE'], mode: mode)
-    api = Steem::Api.new(url: ENV['TEST_NODE'])
+    stream = Crea::Stream.new(url: ENV['TEST_NODE'], mode: mode)
+    api = Crea::Api.new(url: ENV['TEST_NODE'])
     
     api.get_dynamic_global_properties do |properties|
       current_block_num = if mode == :head
@@ -258,8 +258,8 @@ namespace :stream do
   task :all_op_range, [:mode, :at_block_num] do |t, args|
     mode = (args[:mode] || 'irreversible').to_sym
     first_block_num = args[:at_block_num].to_i if !!args[:at_block_num]
-    stream = Steem::Stream.new(url: ENV['TEST_NODE'], mode: mode)
-    api = Steem::Api.new(url: ENV['TEST_NODE'])
+    stream = Crea::Stream.new(url: ENV['TEST_NODE'], mode: mode)
+    api = Crea::Api.new(url: ENV['TEST_NODE'])
     
     api.get_dynamic_global_properties do |properties|
       current_block_num = if mode == :head
@@ -284,9 +284,9 @@ end
 
 task default: :test
 
-desc 'Ruby console with steem already required.'
+desc 'Ruby console with crea already required.'
 task :console do
-  exec 'irb -r steem -I ./lib'
+  exec 'irb -r crea -I ./lib'
 end
 
 namespace :clean do
@@ -301,7 +301,7 @@ namespace :show do
   desc 'Shows known API names.'
   task :apis do
     url = ENV['URL']
-    jsonrpc = Steem::Jsonrpc.new(url: url)
+    jsonrpc = Crea::Jsonrpc.new(url: url)
     api_methods = jsonrpc.get_api_methods
     puts api_methods.keys
   end
@@ -309,7 +309,7 @@ namespace :show do
   desc 'Shows known method names for specified API.'
   task :methods, [:api] do |t, args|
     url = ENV['URL']
-    jsonrpc = Steem::Jsonrpc.new(url: url)
+    jsonrpc = Crea::Jsonrpc.new(url: url)
     api_methods = jsonrpc.get_api_methods
     api_methods[args[:api]].each do |method|
       jsonrpc.get_signature(method: "#{args[:api]}.#{method}") do |signature|
