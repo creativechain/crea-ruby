@@ -8,7 +8,7 @@ module Crea
     NETWORKS_CREA_CORE_ASSET = ["0", 3, "@@000000021"] # CREA
     NETWORKS_CREA_DEBT_ASSET = ["0", 3, "@@000000013"] # CBD
     NETWORKS_CREA_VEST_ASSET = ["0", 6, "@@000000037"] # VESTS
-    NETWORKS_CREA_DEFAULT_NODE = 'https://node1.creary.net' # √
+    NETWORKS_CREA_DEFAULT_NODE = 'https://nodes.creary.net' # √
     # NETWORKS_CREA_DEFAULT_NODE = 'https://api.crearystage.com' # √
     # NETWORKS_CREA_DEFAULT_NODE = 'https://api.crearydev.com' # √
     # NETWORKS_CREA_DEFAULT_NODE = 'https://appbasetest.timcliff.com'
